@@ -9,7 +9,8 @@ Products downloaded:
 - AETI (Actual Evapotranspiration and Interception)
 - T (Transpiration)
 - NPP (Net Primary Production)
-- LCC (Land Cover Classification) - Annual
+- RET (Reference Evapotranspiration) - L1 only
+- PCP (Precipitation) - L1 only
 
 All rasters are clipped to the bounding box derived from the input AOI
 using GDAL's efficient cloud-native access (/vsicurl/).
@@ -26,8 +27,11 @@ Output Structure:
         NPP/
             NPP_2020-01-D1.tif
             ...
-        LCC/
-            LCC_2020.tif
+        RET/
+            RET_2020-01-D1.tif
+            ...
+        PCP/
+            PCP_2020.tif (annual)
         run_manifest.json
 """
 
@@ -95,11 +99,9 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
     FAILED_COUNT = 'FAILED_COUNT'
     MANIFEST_PATH = 'MANIFEST_PATH'
 
-    # Available products for download.
-    # IMPORTANT: Keep this list index-compatible with the pipeline algorithm
-    # (alg_pipeline.py) because the pipeline passes the selected enum indices
-    # directly into this algorithm.
-    PRODUCT_CHOICES = ['AETI', 'T', 'NPP', 'RET', 'PCP', 'LCC']
+    # Available products for download in WaPOR v3.
+    # Note: LCC (Land Cover) is NOT available in WaPOR v3
+    PRODUCT_CHOICES = ['AETI', 'T', 'NPP', 'RET', 'PCP']
 
     def name(self) -> str:
         return 'download'
@@ -127,9 +129,10 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
         • Start and end dates (YYYY-MM-DD)
 
         <b>Key Parameters:</b>
-        • <b>Level:</b> L1 (250m continental), L2 (100m national) - <i>Note: L3 not available in v3</i>
-        • <b>Products:</b> AETI, T, NPP (L2), RET, PCP (L1 only)
+        • <b>Level:</b> L1 (250m continental), L2 (100m national)
+        • <b>Products:</b> AETI, T, NPP (L1/L2), RET, PCP (L1 only)
         • <b>Temporal:</b> Dekadal (D), Monthly (M), or Annual (A)
+        • <b>Note:</b> LCC (Land Cover) is NOT available in WaPOR v3
 
         <b>Level Notes:</b>
         • RET and PCP are only available at Level 1 (global coverage)
@@ -234,7 +237,7 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
                 'Products to Download',
                 options=self.PRODUCT_CHOICES,
                 allowMultiple=True,
-                defaultValue=[0, 1, 2, 3, 4, 5]  # AETI, T, NPP, RET, PCP, LCC (all)
+                defaultValue=[0, 1, 2, 3, 4]  # AETI, T, NPP, RET, PCP (all available in v3)
             )
         )
 
@@ -372,13 +375,9 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
             feedback.pushInfo(f'\n--- Processing {product} ---')
 
             # Handle special cases for WaPOR v3:
-            # - LCC: annual only
             # - RET, PCP: L1 only (global data)
             prod_temporal = temporal
             prod_level = level
-
-            if product == 'LCC':
-                prod_temporal = 'A'
 
             if product in ['RET', 'PCP']:
                 prod_level = 1  # RET and PCP only available at L1
