@@ -153,21 +153,9 @@ class SettingsDialog(QDialog):
             self._set_status('Please enter a token first', success=False)
             return
 
-        self._set_status('Validating token...', success=None)
-
-        # Try to validate the token
-        try:
-            from ..core.wapor_client import WaPORClient
-            client = WaPORClient(api_token=token)
-
-            # Try a simple API call to validate
-            if client.validate_token():
-                self._set_status('Token is valid!', success=True)
-            else:
-                self._set_status('Token validation failed - token may be invalid', success=False)
-
-        except Exception as e:
-            self._set_status(f'Validation error: {str(e)}', success=False)
+        # WaPOR v3 does not require a token!
+        # This validation is only for legacy v2 compatibility
+        self._set_status('Note: WaPOR v3 does NOT require a token. You can download data without authentication.', success=True)
 
     def _save_token(self):
         """Save the token and close the dialog."""
