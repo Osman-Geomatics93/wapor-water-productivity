@@ -234,7 +234,7 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
                 'Products to Download',
                 options=self.PRODUCT_CHOICES,
                 allowMultiple=True,
-                defaultValue=[0, 1, 2, 3]  # AETI, T, NPP, RET
+                defaultValue=[0, 1, 2, 3, 4, 5]  # AETI, T, NPP, RET, PCP, LCC (all)
             )
         )
 
