@@ -154,6 +154,10 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
         • Enable "Skip existing" to resume interrupted downloads
         • Level 2 (100m) recommended for most applications
 
+        <b>Data Availability Notes:</b>
+        • <b>PCP (Precipitation):</b> Dekadal only 2018-2019, Monthly only 2018-2020, Annual available 2018-2025
+        • For recent years (2020+), PCP automatically uses annual resolution
+
         <b>Common Issues:</b>
         • <i>"No data available"</i> → Check AOI is within WaPOR coverage (Africa/Middle East)
         • <i>Timeout errors</i> → Enable "Skip existing" and re-run to resume
@@ -379,6 +383,24 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
             if product in ['RET', 'PCP']:
                 prod_level = 1  # RET and PCP only available at L1
                 feedback.pushInfo(f'Note: {product} only available at Level 1')
+
+            # Handle PCP data availability limitation in WaPOR v3
+            # PCP dekadal only has 2018-2019 data, monthly has 2018-2020
+            # Only annual (PCP-A) has data up to 2025
+            if product == 'PCP':
+                start_year = int(start_date_str[:4])
+                if prod_temporal == 'D' and start_year > 2019:
+                    feedback.pushWarning(
+                        f'WARNING: PCP dekadal data only available 2018-2019 in WaPOR v3. '
+                        f'Your date range starts in {start_year}. Switching to annual (PCP-A).'
+                    )
+                    prod_temporal = 'A'
+                elif prod_temporal == 'M' and start_year > 2020:
+                    feedback.pushWarning(
+                        f'WARNING: PCP monthly data only available 2018-2020 in WaPOR v3. '
+                        f'Your date range starts in {start_year}. Switching to annual (PCP-A).'
+                    )
+                    prod_temporal = 'A'
 
             # Get mapset code (v3 format: L2-AETI-D)
             mapset_code = get_mapset_code(product, prod_level, prod_temporal)
