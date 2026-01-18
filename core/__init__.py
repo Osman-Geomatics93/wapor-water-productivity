@@ -20,7 +20,10 @@ from .exceptions import (
 )
 
 from .auth_manager import AuthManager, get_auth_manager
-from .wapor_client import WaPORClient, get_cube_code
+from .wapor_client import WaPORClientV3, get_cube_code, get_mapset_code
+
+# Alias for backward compatibility
+WaPORClient = WaPORClientV3
 from .download_manager import DownloadManager
 from .manifest import (
     RunManifest,
@@ -123,7 +126,9 @@ __all__ = [
     'get_auth_manager',
     # Client
     'WaPORClient',
+    'WaPORClientV3',
     'get_cube_code',
+    'get_mapset_code',
     # Download
     'DownloadManager',
     # Manifest
