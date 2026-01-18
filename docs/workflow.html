@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaPOR Water Productivity Plugin - Workflow</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0c1929 0%, #1a365d 50%, #0c1929 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #e2e8f0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #34d399, #60a5fa);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient 3s ease infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes gradient {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            font-weight: 400;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            color: #60a5fa;
+        }
+
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+        }
+
+        .step {
+            display: flex;
+            align-items: stretch;
+            gap: 30px;
+            position: relative;
+        }
+
+        .step-number {
+            width: 80px;
+            min-width: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .number-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .step:hover .number-circle {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(96, 165, 250, 0.5);
+        }
+
+        .connector-line {
+            position: absolute;
+            width: 4px;
+            background: linear-gradient(180deg, var(--step-color), var(--next-color, #374151));
+            left: 50%;
+            transform: translateX(-50%);
+            top: 60px;
+            bottom: -20px;
+            z-index: 1;
+        }
+
+        .step:last-child .connector-line {
+            display: none;
+        }
+
+        .step-content {
+            flex: 1;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--step-color);
+        }
+
+        .step:hover .step-content {
+            transform: translateX(10px);
+            border-color: var(--step-color);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--step-color);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .step-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--step-color), var(--step-color-dark));
+        }
+
+        .step-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .step-desc {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .io-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        .io-box {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .io-box h4 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .io-box h4::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .io-box.input h4::before {
+            background: #f97316;
+        }
+
+        .io-box.process h4::before {
+            background: #8b5cf6;
+        }
+
+        .io-box.output h4::before {
+            background: #22c55e;
+        }
+
+        .io-list {
+            list-style: none;
+        }
+
+        .io-list li {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            padding: 4px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .io-list li::before {
+            content: '›';
+            color: var(--step-color);
+            font-weight: bold;
+        }
+
+        .formula-box {
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-top: 15px;
+            border-left: 3px solid var(--step-color);
+        }
+
+        .formula-box code {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #a5f3fc;
+        }
+
+        /* Step Colors */
+        .step-1 { --step-color: #3b82f6; --step-color-dark: #1d4ed8; --next-color: #8b5cf6; }
+        .step-2 { --step-color: #8b5cf6; --step-color-dark: #6d28d9; --next-color: #ec4899; }
+        .step-3 { --step-color: #ec4899; --step-color-dark: #be185d; --next-color: #f97316; }
+        .step-4 { --step-color: #f97316; --step-color-dark: #c2410c; --next-color: #22c55e; }
+        .step-5 { --step-color: #22c55e; --step-color-dark: #15803d; --next-color: #06b6d4; }
+        .step-6 { --step-color: #06b6d4; --step-color-dark: #0e7490; }
+
+        .step-1 .number-circle { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .step-2 .number-circle { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+        .step-3 .number-circle { background: linear-gradient(135deg, #ec4899, #be185d); }
+        .step-4 .number-circle { background: linear-gradient(135deg, #f97316, #c2410c); }
+        .step-5 .number-circle { background: linear-gradient(135deg, #22c55e, #15803d); }
+        .step-6 .number-circle { background: linear-gradient(135deg, #06b6d4, #0e7490); }
+
+        .legend {
+            margin-top: 50px;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.input { background: #f97316; }
+        .legend-dot.process { background: #8b5cf6; }
+        .legend-dot.output { background: #22c55e; }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+
+        @media (max-width: 900px) {
+            .io-container {
+                grid-template-columns: 1fr;
+            }
+
+            .step {
+                flex-direction: column;
+            }
+
+            .step-number {
+                flex-direction: row;
+                width: 100%;
+                gap: 15px;
+            }
+
+            .connector-line {
+                display: none;
+            }
+
+            .step:hover .step-content {
+                transform: translateY(-5px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>WaPOR Water Productivity Plugin</h1>
+            <p class="subtitle">Complete Water Productivity Analysis Workflow for QGIS</p>
+            <span class="badge">FAO WaPOR v3 API - No Token Required</span>
+        </header>
+
+        <div class="flowchart">
+            <!-- Step 1: Download -->
+            <div class="step step-1">
+                <div class="step-number">
+                    <div class="number-circle">1</div>
+                    <div class="connector-line"></div>
+                </div>
+                <div class="step-content">
+                    <div class="step-header">
+                        <div class="step-icon">📥</div>
+                        <h3 class="step-title">Download WaPOR Data</h3>
+                    </div>
+                    <p class="step-desc">
+                        Fetch remote sensing data from FAO's WaPOR v3 open API. Uses GDAL's efficient
+                        cloud-native access (/vsicurl/) for bbox clipping. No authentication required.
+                    </p>
+                    <div class="io-container">
+                        <div class="io-box input">
+                            <h4>Inputs</h4>
+                            <ul class="io-list">
+                                <li>Area of Interest (AOI)</li>
+                                <li>Date Range (Start/End)</li>
+                                <li>WaPOR Level (L1/L2)</li>
+                                <li>Products Selection</li>
+                            </ul>
+                        </div>
+                        <div class="io-box process">
+                            <h4>Data Products</h4>
+                            <ul class="io-list">
+                                <li>AETI - Evapotranspiration</li>
+                                <li>T - Transpiration</li>
+                                <li>NPP - Net Primary Production</li>
+                                <li>RET - Reference ET (L1)</li>
+                                <li>PCP - Precipitation (L1)</li>
+                            </ul>
+                        </div>
+                        <div class="io-box output">
+                            <h4>Outputs</h4>
+                            <ul class="io-list">
+                                <li>Dekadal GeoTIFF rasters</li>
+                                <li>Organized product folders</li>
+                                <li>run_manifest.json</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Prepare -->
+            <div class="step step-2">
+                <div class="step-number">
+                    <div class="number-circle">2</div>
+                    <div class="connector-line"></div>
+                </div>
+                <div class="step-content">
+                    <div class="step-header">
+                        <div class="step-icon">⚙️</div>
+                        <h3 class="step-title">Prepare Data</h3>
+                    </div>
+                    <p class="step-desc">
+                        Align all rasters to a common reference grid (CRS, resolution, extent).
+                        Apply spatial AOI mask and thematic Land Cover Classification (LCC) mask
+                        to filter cropland areas. Memory-efficient block-wise processing.
+                    </p>
+                    <div class="io-container">
+                        <div class="io-box input">
+                            <h4>Inputs</h4>
+                            <ul class="io-list">
+                                <li>Downloaded rasters</li>
+                                <li>Reference raster</li>
+                                <li>AOI vector layer</li>
+                                <li>LCC classes to include</li>
+                            </ul>
+                        </div>
+                        <div class="io-box process">
+                            <h4>Processing</h4>
+                            <ul class="io-list">
+                                <li>Reproject to reference CRS</li>
+                                <li>Resample to target resolution</li>
+                                <li>Rasterize AOI polygon</li>
+                                <li>Apply combined masks</li>
+                            </ul>
+                        </div>
+                        <div class="io-box output">
+                            <h4>Outputs</h4>
+                            <ul class="io-list">
+                                <li>T_filtered/</li>
+                                <li>AETI_filtered/</li>
+                                <li>NPP_filtered/</li>
+                                <li>RET_filtered/</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Seasonal -->
+            <div class="step step-3">
+                <div class="step-number">
+                    <div class="number-circle">3</div>
+                    <div class="connector-line"></div>
+                </div>
+                <div class="step-content">
+                    <div class="step-header">
+                        <div class="step-icon">📅</div>
+                        <h3 class="step-title">Seasonal Aggregation</h3>
+                    </div>
+                    <p class="step-desc">
+                        Aggregate dekadal (10-day) rasters into seasonal totals based on a user-defined
+                        season table. Compute potential evapotranspiration (ETp) using monthly crop
+                        coefficients (Kc) if provided.
+                    </p>
+                    <div class="io-container">
+                        <div class="io-box input">
+                            <h4>Inputs</h4>
+                            <ul class="io-list">
+                                <li>Filtered dekadal rasters</li>
+                                <li>Season table (CSV)</li>
+                                <li>Kc table (optional)</li>
+                            </ul>
+                        </div>
+                        <div class="io-box process">
+                            <h4>Processing</h4>
+                            <ul class="io-list">
+                                <li>Sum T, AETI, NPP per season</li>
+                                <li>Sum RET per season</li>
+                                <li>ETp = Σ(RET × Kc)</li>
+                            </ul>
+                        </div>
+                        <div class="io-box output">
+                            <h4>Outputs</h4>
+                            <ul class="io-list">
+                                <li>Seasonal AETI rasters</li>
+                                <li>Seasonal T rasters</li>
+                                <li>Seasonal NPP rasters</li>
+                                <li>Seasonal ETp rasters</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Indicators -->
+            <div class="step step-4">
+                <div class="step-number">
+                    <div class="number-circle">4</div>
+                    <div class="connector-line"></div>
+                </div>
+                <div class="step-content">
+                    <div class="step-header">
+                        <div class="step-icon">📊</div>
+                        <h3 class="step-title">Performance Indicators</h3>
+                    </div>
+                    <p class="step-desc">
+                        Calculate water productivity performance indicators to assess irrigation
+                        efficiency, water use adequacy, and spatial uniformity across the study area.
+                    </p>
+                    <div class="io-container">
+                        <div class="io-box input">
+                            <h4>Inputs</h4>
+                            <ul class="io-list">
+                                <li>Seasonal AETI</li>
+                                <li>Seasonal T</li>
+                                <li>Seasonal ETp</li>
+                            </ul>
+                        </div>
+                        <div class="io-box process">
+                            <h4>Calculations</h4>
+                            <ul class="io-list">
+                                <li>BF = T / AETI</li>
+                                <li>Adequacy = AETI / ETp</li>
+                                <li>CV = σ / μ × 100</li>
+                                <li>RWD = 1 - (AETI / ETx)</li>
+                            </ul>
+                        </div>
+                        <div class="io-box output">
+                            <h4>Outputs</h4>
+                            <ul class="io-list">
+                                <li>BF/ (Beneficial Fraction)</li>
+                                <li>Adequacy/ rasters</li>
+                                <li>indicators_summary.csv</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="formula-box">
+                        <code>BF ∈ [0,1] → Higher = more efficient water use by crops</code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Productivity -->
+            <div class="step step-5">
+                <div class="step-number">
+                    <div class="number-circle">5</div>
+                    <div class="connector-line"></div>
+                </div>
+                <div class="step-content">
+                    <div class="step-header">
+                        <div class="step-icon">🌾</div>
+                        <h3 class="step-title">Land & Water Productivity</h3>
+                    </div>
+                    <p class="step-desc">
+                        Convert Net Primary Production (NPP) to above-ground biomass and crop yield,
+                        then compute water productivity metrics showing kg of product per m³ of water consumed.
+                    </p>
+                    <div class="io-container">
+                        <div class="io-box input">
+                            <h4>Inputs</h4>
+                            <ul class="io-list">
+                                <li>Seasonal NPP</li>
+                                <li>Seasonal AETI</li>
+                                <li>Crop parameters</li>
+                            </ul>
+                        </div>
+                        <div class="io-box process">
+                            <h4>Parameters</h4>
+                            <ul class="io-list">
+                                <li>MC - Moisture Content</li>
+                                <li>fc - LUE Correction</li>
+                                <li>AOT - Above-ground ratio</li>
+                                <li>HI - Harvest Index</li>
+                            </ul>
+                        </div>
+                        <div class="io-box output">
+                            <h4>Outputs</h4>
+                            <ul class="io-list">
+                                <li>Biomass/ (ton/ha)</li>
+                                <li>Yield/ (ton/ha)</li>
+                                <li>WPb/ (kg/m³)</li>
+                                <li>WPy/ (kg/m³)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="formula-box">
+                        <code>AGBM = AOT × fc × NPP × 22.222 / (1-MC) / 1000  |  WPb = AGBM × 100 / AETI</code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6: Gaps -->
+            <div class="step step-6">
+                <div class="step-number">
+                    <div class="number-circle">6</div>
+                    <div class="connector-line"></div>
+                </div>
+                <div class="step-content">
+                    <div class="step-header">
+                        <div class="step-icon">🎯</div>
+                        <h3 class="step-title">Productivity Gaps Analysis</h3>
+                    </div>
+                    <p class="step-desc">
+                        Identify productivity gaps by comparing actual values to target benchmarks (e.g., 95th percentile).
+                        Detect "bright spots" - areas with both high production AND high water productivity
+                        that can serve as models for improvement.
+                    </p>
+                    <div class="io-container">
+                        <div class="io-box input">
+                            <h4>Inputs</h4>
+                            <ul class="io-list">
+                                <li>Biomass rasters</li>
+                                <li>Yield rasters</li>
+                                <li>WPb rasters</li>
+                                <li>WPy rasters</li>
+                            </ul>
+                        </div>
+                        <div class="io-box process">
+                            <h4>Analysis</h4>
+                            <ul class="io-list">
+                                <li>Compute P95 targets</li>
+                                <li>Gap = max(Target - Actual, 0)</li>
+                                <li>Bright spot classification</li>
+                            </ul>
+                        </div>
+                        <div class="io-box output">
+                            <h4>Outputs</h4>
+                            <ul class="io-list">
+                                <li>BiomassGap/ rasters</li>
+                                <li>WPbGap/ rasters</li>
+                                <li>BrightSpot/ classification</li>
+                                <li>gaps_summary.csv</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="formula-box">
+                        <code>Gap = max(P95_target - Actual, 0) → Potential improvement in kg/ha or kg/m³</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <span class="legend-dot input"></span>
+                <span>Inputs</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot process"></span>
+                <span>Processing / Parameters</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot output"></span>
+                <span>Outputs</span>
+            </div>
+        </div>
+
+        <footer>
+            <p>WaPOR Water Productivity Analysis Plugin for QGIS</p>
+            <p style="margin-top: 8px;">
+                Based on <a href="https://data.apps.fao.org/wapor/" target="_blank">FAO WaPOR</a> methodology
+                | <a href="https://github.com/Osman-Geomatics93/wapor-water-productivity" target="_blank">GitHub Repository</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
