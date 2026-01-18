@@ -36,6 +36,7 @@ Output Structure:
 """
 
 import os
+import shutil
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -69,6 +70,8 @@ from ...core.config import (
     DEFAULT_MAX_RETRIES,
 )
 from ...core.exceptions import WaPORAPIError, WaPORCancelled
+from ...core.database import get_database
+from ...core.cache_manager import get_cache_manager
 
 
 class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
@@ -89,6 +92,7 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
     TEMPORAL_RESOLUTION = 'TEMPORAL_RESOLUTION'
     PRODUCTS = 'PRODUCTS'
     SKIP_EXISTING = 'SKIP_EXISTING'
+    USE_CACHE = 'USE_CACHE'
     MAX_RETRIES = 'MAX_RETRIES'
     OUTPUT_DIR = 'OUTPUT_DIR'
 
@@ -97,6 +101,7 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
     DOWNLOAD_COUNT = 'DOWNLOAD_COUNT'
     SKIPPED_COUNT = 'SKIPPED_COUNT'
     FAILED_COUNT = 'FAILED_COUNT'
+    CACHED_COUNT = 'CACHED_COUNT'
     MANIFEST_PATH = 'MANIFEST_PATH'
 
     # Available products for download in WaPOR v3.
@@ -156,6 +161,7 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
         • Use smaller AOI for faster downloads
         • Enable "Skip existing" to resume interrupted downloads
         • Level 2 (100m) recommended for most applications
+        • Enable "Use Cache" to reuse downloaded data across analyses
 
         <b>Data Availability Notes:</b>
         • <b>PCP (Precipitation):</b> Dekadal only 2018-2019, Monthly only 2018-2020, Annual available 2018-2025
@@ -250,6 +256,15 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
             )
         )
 
+        # Use cache (offline mode)
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.USE_CACHE,
+                'Use Cache (Offline Mode)',
+                defaultValue=True
+            )
+        )
+
         # Max retries
         self.addParameter(
             QgsProcessingParameterNumber(
@@ -300,6 +315,13 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
         )
 
         self.addOutput(
+            QgsProcessingOutputNumber(
+                self.CACHED_COUNT,
+                'Files From Cache'
+            )
+        )
+
+        self.addOutput(
             QgsProcessingOutputString(
                 self.MANIFEST_PATH,
                 'Manifest Path'
@@ -323,6 +345,7 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
         temporal_idx = self.parameterAsEnum(parameters, self.TEMPORAL_RESOLUTION, context)
         product_indices = self.parameterAsEnums(parameters, self.PRODUCTS, context)
         skip_existing = self.parameterAsBool(parameters, self.SKIP_EXISTING, context)
+        use_cache = self.parameterAsBool(parameters, self.USE_CACHE, context)
         max_retries = self.parameterAsInt(parameters, self.MAX_RETRIES, context)
         output_dir = self.parameterAsString(parameters, self.OUTPUT_DIR, context)
 
@@ -349,14 +372,41 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
         client = WaPORClientV3()
         feedback.pushInfo('Connected to WaPOR v3 API')
 
+        # Initialize cache manager and database
+        cache_manager = get_cache_manager()
+        cache_manager.enabled = use_cache
+        db = get_database()
+
+        if use_cache:
+            cache_stats = cache_manager.get_stats()
+            feedback.pushInfo(f'Cache enabled: {cache_stats["total_files"]} files ({cache_stats["total_size_mb"]} MB)')
+        else:
+            feedback.pushInfo('Cache disabled')
+
         # Create output directory
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
+
+        # Create analysis run record
+        aoi_name = aoi_layer.name() if aoi_layer else 'extent'
+        run_id = db.create_run(
+            aoi_name=aoi_name,
+            aoi_bbox=bbox,
+            start_date=start_date_str,
+            end_date=end_date_str,
+            level=level,
+            products=selected_products,
+            output_dir=str(output_path),
+            metadata={'temporal': temporal, 'use_cache': use_cache}
+        )
+        db.update_run_status(run_id, 'running')
+        feedback.pushInfo(f'Analysis run ID: {run_id}')
 
         # Track statistics
         total_downloaded = 0
         total_skipped = 0
         total_failed = 0
+        total_cached = 0
         all_outputs = {}
 
         # Format dates for API
@@ -449,6 +499,23 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
                     downloaded_files.append(str(output_file))
                     continue
 
+                # Check cache first
+                if use_cache:
+                    cached_path = cache_manager.check_cache(
+                        product=product,
+                        level=prod_level,
+                        temporal=prod_temporal,
+                        time_code=time_code,
+                        bbox=bbox
+                    )
+                    if cached_path:
+                        # Copy from cache to output
+                        shutil.copy2(cached_path, str(output_file))
+                        feedback.pushInfo(f'From cache: {filename}')
+                        total_cached += 1
+                        downloaded_files.append(str(output_file))
+                        continue
+
                 # Download with GDAL (includes bbox clipping)
                 feedback.pushInfo(f'Downloading: {filename}...')
 
@@ -466,6 +533,19 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
                             feedback.pushInfo(f'Downloaded: {filename}')
                             total_downloaded += 1
                             downloaded_files.append(str(output_file))
+
+                            # Add to cache
+                            if use_cache:
+                                cache_manager.add_to_cache(
+                                    product=product,
+                                    level=prod_level,
+                                    temporal=prod_temporal,
+                                    time_code=time_code,
+                                    bbox=bbox,
+                                    source_path=str(output_file),
+                                    download_url=raster_info.get('downloadUrl'),
+                                    copy_file=True
+                                )
                     except Exception as e:
                         retry_count += 1
                         if retry_count < max_retries:
@@ -478,17 +558,31 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
 
         feedback.setProgress(100)
 
+        # Update run status
+        if total_failed == 0:
+            db.update_run_status(run_id, 'completed')
+        else:
+            db.update_run_status(run_id, 'completed_with_errors',
+                                 f'{total_failed} files failed to download')
+        db.update_run_step(run_id, 1)
+
         # Summary
         feedback.pushInfo(f'\n=== Download Summary ===')
         feedback.pushInfo(f'Downloaded: {total_downloaded}')
+        feedback.pushInfo(f'From cache: {total_cached}')
         feedback.pushInfo(f'Skipped: {total_skipped}')
         feedback.pushInfo(f'Failed: {total_failed}')
+
+        if use_cache:
+            cache_stats = cache_manager.get_stats()
+            feedback.pushInfo(f'\nCache status: {cache_stats["total_files"]} files ({cache_stats["total_size_mb"]} MB)')
 
         return {
             self.OUTPUT_FOLDER: str(output_path),
             self.DOWNLOAD_COUNT: total_downloaded,
             self.SKIPPED_COUNT: total_skipped,
             self.FAILED_COUNT: total_failed,
+            self.CACHED_COUNT: total_cached,
             self.MANIFEST_PATH: str(output_path / 'run_manifest.json'),
         }
 

@@ -21,6 +21,8 @@ from .exceptions import (
 
 from .auth_manager import AuthManager, get_auth_manager
 from .wapor_client import WaPORClientV3, get_cube_code, get_mapset_code
+from .database import DatabaseManager, get_database, get_database_path, get_cache_directory
+from .cache_manager import CacheManager, get_cache_manager
 
 # Alias for backward compatibility
 WaPORClient = WaPORClientV3
@@ -129,6 +131,13 @@ __all__ = [
     'WaPORClientV3',
     'get_cube_code',
     'get_mapset_code',
+    # Database & Cache
+    'DatabaseManager',
+    'get_database',
+    'get_database_path',
+    'get_cache_directory',
+    'CacheManager',
+    'get_cache_manager',
     # Download
     'DownloadManager',
     # Manifest

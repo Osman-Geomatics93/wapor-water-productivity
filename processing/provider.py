@@ -98,6 +98,7 @@ class WaPORProcessingProvider(QgsProcessingProvider):
         from .algorithms.alg_productivity import WaterProductivityAlgorithm
         from .algorithms.alg_gaps import ProductivityGapsAlgorithm
         from .algorithms.alg_pipeline import FullPipelineAlgorithm
+        from .algorithms.alg_manage_cache import ManageCacheAlgorithm
 
         algorithms = [
             ConfigureTokenAlgorithm(),
@@ -108,6 +109,7 @@ class WaPORProcessingProvider(QgsProcessingProvider):
             WaterProductivityAlgorithm(),
             ProductivityGapsAlgorithm(),
             FullPipelineAlgorithm(),
+            ManageCacheAlgorithm(),
         ]
 
         for alg in algorithms:

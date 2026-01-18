@@ -12,6 +12,7 @@ Algorithms:
     - alg_productivity: Land & water productivity
     - alg_gaps: Bright spots & productivity gaps
     - alg_pipeline: Full workflow pipeline
+    - alg_manage_cache: Cache and history management
 """
 
 from .alg_download import DownloadWaPORDataAlgorithm
@@ -21,6 +22,7 @@ from .alg_indicators import PerformanceIndicatorsAlgorithm
 from .alg_productivity import WaterProductivityAlgorithm
 from .alg_gaps import ProductivityGapsAlgorithm
 from .alg_pipeline import FullPipelineAlgorithm
+from .alg_manage_cache import ManageCacheAlgorithm
 
 __all__ = [
     'DownloadWaPORDataAlgorithm',
@@ -30,4 +32,5 @@ __all__ = [
     'WaterProductivityAlgorithm',
     'ProductivityGapsAlgorithm',
     'FullPipelineAlgorithm',
+    'ManageCacheAlgorithm',
 ]
