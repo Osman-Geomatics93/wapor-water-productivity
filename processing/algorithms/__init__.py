@@ -1,0 +1,33 @@
+# -*- coding: utf-8 -*-
+"""
+WaPOR Water Productivity - Processing Algorithms Package
+
+Contains all Processing algorithms for the WaPOR workflow.
+
+Algorithms:
+    - alg_download: Download WaPOR data
+    - alg_prepare: Prepare data (resample, mask)
+    - alg_seasonal: Seasonal aggregation
+    - alg_indicators: Performance indicators
+    - alg_productivity: Land & water productivity
+    - alg_gaps: Bright spots & productivity gaps
+    - alg_pipeline: Full workflow pipeline
+"""
+
+from .alg_download import DownloadWaPORDataAlgorithm
+from .alg_prepare import PrepareDataAlgorithm
+from .alg_seasonal import SeasonalAggregationAlgorithm
+from .alg_indicators import PerformanceIndicatorsAlgorithm
+from .alg_productivity import WaterProductivityAlgorithm
+from .alg_gaps import ProductivityGapsAlgorithm
+from .alg_pipeline import FullPipelineAlgorithm
+
+__all__ = [
+    'DownloadWaPORDataAlgorithm',
+    'PrepareDataAlgorithm',
+    'SeasonalAggregationAlgorithm',
+    'PerformanceIndicatorsAlgorithm',
+    'WaterProductivityAlgorithm',
+    'ProductivityGapsAlgorithm',
+    'FullPipelineAlgorithm',
+]

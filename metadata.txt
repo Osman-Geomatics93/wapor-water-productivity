@@ -1,0 +1,33 @@
+[general]
+name=WaPOR Water Productivity Analysis
+qgisMinimumVersion=3.40
+qgisMaximumVersion=3.99
+description=FAO WaPOR-based water productivity analysis for irrigation performance assessment
+version=0.1.0
+author=WaPOR WP Development Team
+email=contact@example.org
+about=Integrates FAO WaPOR remote sensing data for comprehensive water productivity analysis.
+
+    Features:
+    - Bulk WaPOR data download with retry/resume support
+    - Automated resampling and masking with raster contract enforcement
+    - Seasonal aggregation with customizable Kc values
+    - Performance indicators (uniformity, beneficial fraction, adequacy, RWD)
+    - Land and water productivity calculation
+    - Productivity gap analysis and bright spot identification
+    - Full pipeline automation with reproducible manifests
+
+    Based on IHE Delft WAPORWP methodology.
+    Requires WaPOR API token from https://wapor.apps.fao.org/profile
+
+hasProcessingProvider=yes
+tags=water,productivity,agriculture,irrigation,FAO,WaPOR,remote sensing,evapotranspiration,food security
+category=Analysis
+experimental=False
+deprecated=False
+server=False
+
+changelog=
+    0.1.0 - Initial development release
+        * WaPOR data download (L1, L2) with retry/resume
+        * Basic plugin structure and Processing provider
