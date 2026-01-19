@@ -23,6 +23,10 @@ from .alg_productivity import WaterProductivityAlgorithm
 from .alg_gaps import ProductivityGapsAlgorithm
 from .alg_pipeline import FullPipelineAlgorithm
 from .alg_manage_cache import ManageCacheAlgorithm
+from .alg_load_results import LoadStyleResultsAlgorithm
+from .alg_validate_data import ValidateDataAlgorithm
+from .alg_zonal_stats import ZonalStatisticsAlgorithm
+from .alg_generate_report import GenerateReportAlgorithm
 
 __all__ = [
     'DownloadWaPORDataAlgorithm',
@@ -33,4 +37,8 @@ __all__ = [
     'ProductivityGapsAlgorithm',
     'FullPipelineAlgorithm',
     'ManageCacheAlgorithm',
+    'LoadStyleResultsAlgorithm',
+    'ValidateDataAlgorithm',
+    'ZonalStatisticsAlgorithm',
+    'GenerateReportAlgorithm',
 ]
