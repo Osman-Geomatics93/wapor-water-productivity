@@ -1,94 +1,101 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Osman-Geomatics93/wapor-water-productivity/master/docs/images/logo.png" alt="WaPOR Logo" width="120">
+  <img src="https://img.shields.io/badge/QGIS-3.40+-93b023?style=for-the-badge&logo=qgis&logoColor=white" alt="QGIS">
+  <img src="https://img.shields.io/badge/WaPOR-v3%20API-0066cc?style=for-the-badge" alt="WaPOR">
+  <img src="https://img.shields.io/badge/License-GPL--3.0-blue?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/badge/Version-0.6.0-green?style=for-the-badge" alt="Version">
 </p>
 
 <h1 align="center">WaPOR Water Productivity Analysis</h1>
 
 <p align="center">
-  <strong>A QGIS Processing Plugin for FAO WaPOR-based Water Productivity Analysis</strong>
+  <strong>A Complete QGIS Plugin for FAO WaPOR-based Water Productivity Analysis</strong>
 </p>
 
 <p align="center">
-  <a href="https://qgis.org"><img src="https://img.shields.io/badge/QGIS-3.40+-93b023?style=for-the-badge&logo=qgis&logoColor=white" alt="QGIS"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0-blue?style=for-the-badge" alt="License"></a>
-  <a href="https://data.apps.fao.org/wapor/"><img src="https://img.shields.io/badge/WaPOR-v3%20API-orange?style=for-the-badge" alt="WaPOR"></a>
-  <a href="https://github.com/Osman-Geomatics93/wapor-water-productivity/releases"><img src="https://img.shields.io/badge/Version-0.3.0-green?style=for-the-badge" alt="Version"></a>
-</p>
-
-<p align="center">
-  <a href="#-features">Features</a> •
+  <a href="#-key-features">Features</a> •
   <a href="#-installation">Installation</a> •
-  <a href="#-quick-start">Quick Start</a> •
   <a href="#-workflow">Workflow</a> •
-  <a href="#-data-products">Data Products</a> •
-  <a href="#-formulas">Formulas</a>
+  <a href="#-algorithms">Algorithms</a> •
+  <a href="#-data-products">Products</a>
 </p>
 
 ---
 
-## ✨ Features
+## 🌟 Key Features
 
-- **🔓 No API Token Required** - Uses the new WaPOR v3 open API
-- **📦 Complete Workflow** - From data download to productivity gap analysis
-- **☁️ Cloud-Native Downloads** - Efficient bbox clipping using GDAL `/vsicurl/`
-- **🔧 QGIS Integration** - Full Processing Toolbox integration
-- **📊 6-Step Analysis Pipeline** - Comprehensive water productivity assessment
+| Feature | Description |
+|---------|-------------|
+| **No API Token** | Uses WaPOR v3 open API - no registration required |
+| **Complete Workflow** | 6-step analysis from download to productivity gaps |
+| **Offline Mode** | Cache system for faster repeated analyses |
+| **Auto-Styling** | Professional color symbology for all products |
+| **Zonal Statistics** | Aggregate results by fields/districts |
+| **Report Generator** | Professional HTML/PDF reports |
+| **Progress Tracking** | Database tracks all analysis runs |
+
+---
 
 ## 📥 Installation
 
-### From ZIP (Recommended)
+### Requirements
+- **QGIS 3.40 LTR** or later
+- Internet connection (for downloads)
 
-1. Download the latest release from [Releases](https://github.com/Osman-Geomatics93/wapor-water-productivity/releases)
+### Install from ZIP
+1. Download latest release from [GitHub Releases](https://github.com/Osman-Geomatics93/wapor-water-productivity/releases)
 2. In QGIS: `Plugins` → `Manage and Install Plugins` → `Install from ZIP`
 3. Select the downloaded ZIP file
 4. Restart QGIS
 
-### Requirements
-
-- **QGIS 3.40 LTR** or later
-- **Internet connection** for data downloads
-- **GDAL** (included with QGIS)
-
-## 🚀 Quick Start
-
-```
-1. Open QGIS Processing Toolbox (Ctrl+Alt+T)
-2. Navigate to: WaPOR Water Productivity → Step-by-step
-3. Run "1) Download WaPOR Data"
-   - Select your Area of Interest (shapefile)
-   - Set date range (e.g., 2020-01-01 to 2020-12-31)
-   - Choose Level 2 (100m) for most products
-   - Click Run
-```
+---
 
 ## 🔄 Workflow
 
-The plugin implements a complete 6-step water productivity analysis workflow:
+The plugin implements a complete 6-step water productivity analysis:
 
 ```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  1) Download    │ ──► │  2) Prepare     │ ──► │  3) Seasonal    │
-│  WaPOR Data     │     │  Data           │     │  Aggregation    │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-                                                        │
-┌─────────────────┐     ┌─────────────────┐     ┌───────▼─────────┐
-│  6) Productivity│ ◄── │  5) Land/Water  │ ◄── │  4) Performance │
-│  Gaps           │     │  Productivity   │     │  Indicators     │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│ 1. Download │───►│ 2. Prepare  │───►│ 3. Seasonal │
+│   WaPOR     │    │    Data     │    │ Aggregation │
+└─────────────┘    └─────────────┘    └─────────────┘
+                                             │
+┌─────────────┐    ┌─────────────┐    ┌──────▼──────┐
+│ 6. Gaps &   │◄───│ 5. Water    │◄───│4. Indicators│
+│ Bright Spots│    │ Productivity│    │  BF, CV, RWD│
+└─────────────┘    └─────────────┘    └─────────────┘
 ```
 
-### Step Details
+---
+
+## 📋 Algorithms
+
+### Step-by-step Workflow
 
 | Step | Algorithm | Description |
 |:----:|-----------|-------------|
-| 1 | **Download WaPOR Data** | Fetch rasters from WaPOR v3 API with bbox clipping |
-| 2 | **Prepare Data** | Resample, align, and mask rasters to common grid |
-| 3 | **Seasonal Aggregation** | Aggregate dekadal data to seasonal totals |
+| 1 | **Download WaPOR Data** | Fetch rasters from WaPOR v3 API |
+| 2 | **Prepare Data** | Resample, align, and mask rasters |
+| 3 | **Seasonal Aggregation** | Aggregate dekadal to seasonal |
 | 4 | **Performance Indicators** | Calculate BF, Adequacy, CV, RWD |
 | 5 | **Land & Water Productivity** | Compute biomass, yield, WPb, WPy |
 | 6 | **Productivity Gaps** | Identify gaps and bright spots |
 
-> 📄 **Interactive Workflow Diagram**: Open [docs/workflow.html](docs/workflow.html) in your browser for a detailed interactive visualization.
+### Analysis Tools
+
+| Algorithm | Description |
+|-----------|-------------|
+| **Zonal Statistics** | Aggregate raster values by polygon zones |
+
+### Utilities
+
+| Algorithm | Description |
+|-----------|-------------|
+| **Load & Style Results** | Auto-load outputs with color symbology |
+| **Validate Data** | Check data quality before processing |
+| **Generate Report** | Create professional HTML reports |
+| **Manage Cache** | View/clear cache, browse run history |
+
+---
 
 ## 📊 Data Products
 
@@ -96,107 +103,149 @@ The plugin implements a complete 6-step water productivity analysis workflow:
 
 | Product | Description | Level | Resolution |
 |---------|-------------|:-----:|:----------:|
-| **AETI** | Actual Evapotranspiration & Interception | L1, L2 | 250m, 100m |
+| **AETI** | Actual Evapotranspiration | L1, L2 | 250m, 100m |
 | **T** | Transpiration | L1, L2 | 250m, 100m |
 | **NPP** | Net Primary Production | L1, L2 | 250m, 100m |
 | **RET** | Reference Evapotranspiration | L1 | 25km |
 | **PCP** | Precipitation | L1 | 5km |
 
-### Data Availability Notes
+### Computed Indicators
 
-- **PCP Dekadal**: Only 2018-2019 (plugin auto-switches to annual for recent years)
-- **PCP Monthly**: Only 2018-2020
-- **PCP Annual**: 2018-2025 ✓
-- **Coverage**: Africa and Middle East
-
-## 📐 Formulas
+| Indicator | Formula | Range |
+|-----------|---------|:-----:|
+| **BF** (Beneficial Fraction) | T / AETI | 0-1 |
+| **Adequacy** | AETI / ETp | 0-1.5 |
+| **CV** (Coefficient of Variation) | σ / μ × 100 | 0-100% |
+| **RWD** (Relative Water Deficit) | 1 - (AETI / ETx) | 0-1 |
 
 ### Water Productivity
 
+| Output | Formula | Unit |
+|--------|---------|:----:|
+| **Biomass** | AOT × fc × NPP × 22.222 / (1-MC) / 1000 | ton/ha |
+| **Yield** | Biomass × HI | ton/ha |
+| **WPb** | Biomass × 100 / AETI | kg/m³ |
+| **WPy** | Yield × 100 / AETI | kg/m³ |
+
+---
+
+## 🎨 Auto-Styling
+
+The plugin includes professional color schemes for all products:
+
+| Product Type | Color Scheme | Example |
+|--------------|--------------|---------|
+| Evapotranspiration | Blue gradient | AETI, T, RET |
+| Vegetation | Green gradient | NPP, Biomass, Yield |
+| Performance | Red-Yellow-Green | BF, Adequacy |
+| Variability | Reversed RdYlGn | CV, RWD |
+| Gaps | Red gradient | BiomassGap, WPbGap |
+| Bright Spots | Categorical | Gold, Green |
+
+---
+
+## 💾 Offline Mode & Cache
+
+Downloaded data is automatically cached for reuse:
+
 ```
-AGBM = AOT × fc × NPP × 22.222 / (1 - MC) / 1000   [ton/ha]
-Yield = AGBM × HI                                    [ton/ha]
-WPb = AGBM × 100 / AETI                             [kg/m³]
-WPy = Yield × 100 / AETI                            [kg/m³]
+Benefits:
+├── Faster repeated analyses (instant from cache)
+├── Work without internet connection
+├── Reduced API load
+└── Persistent across QGIS sessions
+
+Cache Location:
+└── <QGIS Profile>/wapor_wp_data/cache/
 ```
 
-### Performance Indicators
+---
 
-| Indicator | Formula | Description |
-|-----------|---------|-------------|
-| **BF** | T / AETI | Beneficial Fraction (0-1) |
-| **Adequacy** | AETI / ETp | Water supply adequacy |
-| **CV** | σ / μ × 100 | Coefficient of Variation (%) |
-| **RWD** | 1 - (AETI / ETx) | Relative Water Deficit |
+## 📈 Progress Database
 
-### Crop Parameters
+All analysis runs are tracked in a local database:
 
-| Parameter | Description | Typical Range |
-|-----------|-------------|---------------|
-| **MC** | Moisture Content | 0.1 - 0.15 |
-| **fc** | LUE Correction Factor | 1.0 - 1.2 |
-| **AOT** | Above-ground Over Total | 0.4 - 0.6 |
-| **HI** | Harvest Index | 0.3 - 0.5 |
+```
+Tracked Information:
+├── Run ID and timestamps
+├── AOI, date range, products
+├── Processing status
+├── Output locations
+└── Statistics
+```
+
+---
 
 ## 📁 Output Structure
 
 ```
-output_dir/
+output_directory/
 ├── AETI/
-│   ├── AETI_2020-01-D1.tif
-│   ├── AETI_2020-01-D2.tif
+│   ├── AETI_2024-01-D1.tif
+│   ├── AETI_2024-01-D2.tif
 │   └── ...
 ├── T/
-│   └── ...
 ├── NPP/
-│   └── ...
 ├── RET/
-│   └── ...
 ├── PCP/
-│   └── PCP_2020.tif (annual)
+├── BF/
+├── Adequacy/
+├── Biomass/
+├── Yield/
+├── WPb/
+├── WPy/
+├── BiomassGap/
+├── WPbGap/
+├── BrightSpot/
 └── run_manifest.json
 ```
 
-## 🌍 Data Sources
+---
 
-- **WaPOR v3 Portal**: https://data.apps.fao.org/wapor/
-- **API Base URL**: `https://data.apps.fao.org/gismgr/api/v2/catalog/workspaces/WAPOR-3`
-- **Coverage**: Africa and Middle East
-- **Temporal**: Dekadal (10-day), Monthly, Annual
+## 🌍 Coverage
+
+- **Geographic**: Africa and Middle East
+- **Temporal**: 2009 - Present
+- **Resolution**:
+  - Level 1: 250m - 25km (continental)
+  - Level 2: 100m (national/regional)
+
+---
+
+## 📖 Documentation
+
+- **Interactive Workflow**: [docs/workflow.html](docs/workflow.html)
+- **WaPOR Portal**: https://data.apps.fao.org/wapor/
+- **FAO WaPOR**: https://www.fao.org/in-action/remote-sensing-for-water-productivity/
+
+---
 
 ## 🐛 Troubleshooting
 
 | Issue | Solution |
 |-------|----------|
-| "No data available" | Check AOI is within WaPOR coverage (Africa/Middle East) |
-| Timeout errors | Enable "Skip existing" and re-run to resume |
-| GDAL errors | Check network connectivity |
-| PCP not downloading | Data auto-switches to annual for years > 2019 |
+| No data available | Check AOI is within WaPOR coverage |
+| PCP not downloading | Auto-switches to annual for years > 2019 |
+| Timeout errors | Enable "Skip existing" and re-run |
+| Import errors | Restart QGIS after installation |
 
-## 🤝 Contributing
+---
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+## 📜 License
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+GNU General Public License v3.0 - see [LICENSE](LICENSE)
 
-## 📄 License
-
-This project is licensed under the **GNU General Public License v3.0** - see the [LICENSE](LICENSE) file for details.
+---
 
 ## 🙏 Acknowledgments
 
-- **FAO WaPOR Team** for the open data API
-- **QGIS Development Team** for the excellent GIS platform
-- **IHE Delft** for the water productivity methodology
-- **Google Earth Engine** for cloud data infrastructure
+- **FAO WaPOR Team** - Open data API
+- **IHE Delft** - Water productivity methodology
+- **QGIS Team** - GIS platform
+
+---
 
 ## 📖 Citation
-
-If you use this plugin in your research, please cite:
 
 ```bibtex
 @software{wapor_wp_qgis,
@@ -207,13 +256,8 @@ If you use this plugin in your research, please cite:
 }
 ```
 
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/Osman-Geomatics93/wapor-water-productivity/issues)
-- **WaPOR Documentation**: https://www.fao.org/in-action/remote-sensing-for-water-productivity/
-
 ---
 
 <p align="center">
-  Made with ❤️ for the water productivity community
+  <strong>Made for the water productivity community</strong>
 </p>
