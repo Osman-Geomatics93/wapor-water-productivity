@@ -3,7 +3,7 @@ name=WaPOR Water Productivity Analysis
 qgisMinimumVersion=3.22
 qgisMaximumVersion=3.99
 description=FAO WaPOR-based water productivity analysis for irrigation performance assessment
-version=0.6.5
+version=0.6.6
 author=Osman Ibrahim
 email=osmangeomatics93@gmail.com
 about=Integrates FAO WaPOR remote sensing data for comprehensive water productivity analysis.
@@ -34,6 +34,8 @@ deprecated=False
 server=False
 
 changelog=
+    0.6.6 - Config Fix
+        * Fix missing DEFAULT_BLOCK_SIZE constant
     0.6.5 - Land Cover Masking Feature
         * Add new "Mask by Land Cover" algorithm for crop masking
         * Support Sentinel 2A and other land cover classifications
