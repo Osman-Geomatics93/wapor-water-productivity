@@ -3,7 +3,7 @@ name=WaPOR Water Productivity Analysis
 qgisMinimumVersion=3.22
 qgisMaximumVersion=3.99
 description=FAO WaPOR-based water productivity analysis for irrigation performance assessment
-version=0.6.3
+version=0.6.4
 author=Osman Ibrahim
 email=osmangeomatics93@gmail.com
 about=Integrates FAO WaPOR remote sensing data for comprehensive water productivity analysis.
@@ -33,6 +33,8 @@ deprecated=False
 server=False
 
 changelog=
+    0.6.4 - Gaps Algorithm Fix
+        * Fix TypeError in gaps algorithm (wrong manifest function arguments)
     0.6.3 - Seasonal Aggregation Fixes
         * Add support for WaPOR v3 filename format (YYYY-MM-DX) in seasonal aggregation
         * Fix 'manifest' attribute error in seasonal aggregation algorithm

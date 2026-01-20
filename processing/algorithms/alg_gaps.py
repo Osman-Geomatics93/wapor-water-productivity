@@ -417,24 +417,7 @@ class ProductivityGapsAlgorithm(WaPORBaseAlgorithm):
         if write_target_rasters:
             targets_dir.mkdir(parents=True, exist_ok=True)
 
-        # Create manifest
-        manifest = create_manifest(
-            algorithm='gaps',
-            parameters={
-                'biomass_folder': biomass_folder,
-                'wpb_folder': wpb_folder,
-                'yield_folder': yield_folder or '',
-                'wpy_folder': wpy_folder or '',
-                'target_percentile': target_pct,
-                'percentile_method': method,
-                'sample_size': sample_size,
-                'brightspot_percentile': bright_pct,
-                'brightspot_mode': bright_mode,
-                'brightspot_output': bright_output,
-                'nodata': nodata,
-                'block_size': block_size,
-            }
-        )
+        # Note: Base class handles manifest creation automatically
 
         feedback.pushInfo('=== Productivity Gaps & Bright Spots ===')
         feedback.pushInfo(f'Biomass folder: {biomass_folder}')
