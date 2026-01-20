@@ -103,6 +103,7 @@ class WaPORProcessingProvider(QgsProcessingProvider):
         from .algorithms.alg_validate_data import ValidateDataAlgorithm
         from .algorithms.alg_zonal_stats import ZonalStatisticsAlgorithm
         from .algorithms.alg_generate_report import GenerateReportAlgorithm
+        from .algorithms.alg_mask_lcc import MaskByLandCoverAlgorithm
 
         algorithms = [
             ConfigureTokenAlgorithm(),
@@ -120,6 +121,7 @@ class WaPORProcessingProvider(QgsProcessingProvider):
             GenerateReportAlgorithm(),
             # Analysis
             ZonalStatisticsAlgorithm(),
+            MaskByLandCoverAlgorithm(),
         ]
 
         for alg in algorithms:

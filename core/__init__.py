@@ -104,6 +104,14 @@ from .gaps_calc import (
     write_targets_csv,
     write_gaps_summary_csv,
 )
+from .masking import (
+    parse_class_values,
+    mask_raster_by_classes,
+    create_mask_from_classes,
+    apply_mask_to_raster,
+    get_unique_classes,
+    validate_raster_alignment as validate_mask_alignment,
+)
 from .pipeline_orchestrator import (
     CACHE_POLICY_REUSE_IF_EXISTS,
     CACHE_POLICY_REUSE_IF_MATCHES,
@@ -218,6 +226,13 @@ __all__ = [
     'compute_brightspot_stats',
     'write_targets_csv',
     'write_gaps_summary_csv',
+    # Masking
+    'parse_class_values',
+    'mask_raster_by_classes',
+    'create_mask_from_classes',
+    'apply_mask_to_raster',
+    'get_unique_classes',
+    'validate_mask_alignment',
     # Pipeline
     'CACHE_POLICY_REUSE_IF_EXISTS',
     'CACHE_POLICY_REUSE_IF_MATCHES',

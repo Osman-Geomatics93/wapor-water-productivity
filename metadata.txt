@@ -3,7 +3,7 @@ name=WaPOR Water Productivity Analysis
 qgisMinimumVersion=3.22
 qgisMaximumVersion=3.99
 description=FAO WaPOR-based water productivity analysis for irrigation performance assessment
-version=0.6.4
+version=0.6.5
 author=Osman Ibrahim
 email=osmangeomatics93@gmail.com
 about=Integrates FAO WaPOR remote sensing data for comprehensive water productivity analysis.
@@ -15,6 +15,7 @@ about=Integrates FAO WaPOR remote sensing data for comprehensive water productiv
     - Performance indicators (uniformity, beneficial fraction, adequacy, RWD)
     - Land and water productivity calculation
     - Productivity gap analysis and bright spot identification
+    - Land cover masking (Sentinel 2A crop classification support)
     - Full pipeline automation with reproducible manifests
 
     Based on IHE Delft WAPORWP methodology.
@@ -25,7 +26,7 @@ repository=https://github.com/Osman-Geomatics93/wapor-water-productivity
 homepage=https://github.com/Osman-Geomatics93/wapor-water-productivity
 
 hasProcessingProvider=yes
-tags=water,productivity,agriculture,irrigation,FAO,WaPOR,remote sensing,evapotranspiration,food security
+tags=water,productivity,agriculture,irrigation,FAO,WaPOR,remote sensing,evapotranspiration,food security,masking,land cover
 category=Analysis
 icon=icon.png
 experimental=False
@@ -33,6 +34,11 @@ deprecated=False
 server=False
 
 changelog=
+    0.6.5 - Land Cover Masking Feature
+        * Add new "Mask by Land Cover" algorithm for crop masking
+        * Support Sentinel 2A and other land cover classifications
+        * Flexible class value input (single, multiple, ranges)
+        * Automatic alignment validation
     0.6.4 - Gaps Algorithm Fix
         * Fix TypeError in gaps algorithm (wrong manifest function arguments)
     0.6.3 - Seasonal Aggregation Fixes
