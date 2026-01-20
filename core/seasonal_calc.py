@@ -253,7 +253,9 @@ def parse_dekad_code(code: str) -> Optional[TimeKey]:
     Supports:
     - YYDD: e.g., "0901" = year 2009, dekad 01
     - YYYYDD: e.g., "201901" = year 2019, dekad 01
-    - ISO date: "2019-01-01"
+    - ISO date: "2019-01-01" (YYYY-MM-DD)
+    - US date: "01/05/2019" (MM/DD/YYYY)
+    - EU date: "05/01/2019" (DD/MM/YYYY) - tried if MM/DD fails
 
     Args:
         code: Dekad code string
@@ -263,31 +265,51 @@ def parse_dekad_code(code: str) -> Optional[TimeKey]:
     """
     code = str(code).strip()
 
-    # ISO date format
+    def _date_to_timekey(dt, raw_code):
+        """Convert datetime to TimeKey."""
+        year = dt.year
+        month = dt.month
+        day = dt.day
+
+        if day <= 10:
+            dekad_in_month = 1
+        elif day <= 20:
+            dekad_in_month = 2
+        else:
+            dekad_in_month = 3
+
+        dekad = (month - 1) * 3 + dekad_in_month
+        start_date, end_date = dekad_to_dates(year, dekad)
+
+        return TimeKey(
+            year=year,
+            dekad=dekad,
+            start_date=start_date,
+            end_date=end_date,
+            raw_code=raw_code
+        )
+
+    # ISO date format (YYYY-MM-DD)
     if '-' in code:
         try:
             dt = datetime.strptime(code, '%Y-%m-%d')
-            year = dt.year
-            month = dt.month
-            day = dt.day
+            return _date_to_timekey(dt, code)
+        except ValueError:
+            pass
 
-            if day <= 10:
-                dekad_in_month = 1
-            elif day <= 20:
-                dekad_in_month = 2
-            else:
-                dekad_in_month = 3
+    # US/EU date format with slashes (MM/DD/YYYY or DD/MM/YYYY)
+    if '/' in code:
+        # Try MM/DD/YYYY first (US format)
+        try:
+            dt = datetime.strptime(code, '%m/%d/%Y')
+            return _date_to_timekey(dt, code)
+        except ValueError:
+            pass
 
-            dekad = (month - 1) * 3 + dekad_in_month
-            start_date, end_date = dekad_to_dates(year, dekad)
-
-            return TimeKey(
-                year=year,
-                dekad=dekad,
-                start_date=start_date,
-                end_date=end_date,
-                raw_code=code
-            )
+        # Try DD/MM/YYYY (EU format)
+        try:
+            dt = datetime.strptime(code, '%d/%m/%Y')
+            return _date_to_timekey(dt, code)
         except ValueError:
             pass
 

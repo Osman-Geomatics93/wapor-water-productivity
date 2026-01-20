@@ -3,7 +3,7 @@ name=WaPOR Water Productivity Analysis
 qgisMinimumVersion=3.22
 qgisMaximumVersion=3.99
 description=FAO WaPOR-based water productivity analysis for irrigation performance assessment
-version=0.6.1
+version=0.6.2
 author=Osman Ibrahim
 email=osmangeomatics93@gmail.com
 about=Integrates FAO WaPOR remote sensing data for comprehensive water productivity analysis.
@@ -33,6 +33,9 @@ deprecated=False
 server=False
 
 changelog=
+    0.6.2 - Date Parsing Enhancement
+        * Add support for MM/DD/YYYY and DD/MM/YYYY date formats in season table
+        * Better error handling for invalid date formats
     0.6.1 - Bugfix Release
         * Fix crash on download: date variables used before definition
     0.6.0 - Analysis & Utility Tools
