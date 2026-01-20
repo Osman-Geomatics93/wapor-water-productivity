@@ -553,29 +553,6 @@ class SeasonalAggregationAlgorithm(WaPORBaseAlgorithm):
         feedback.pushInfo(f'Products processed: {len(outputs)}')
         feedback.pushInfo(f'Total output rasters: {total_outputs}')
 
-        # Update manifest
-        self.manifest.inputs = {
-            'product_folders': product_folders,
-            'season_table': season_table_path,
-            'kc_table': kc_table_path,
-            'compute_etp': compute_etp,
-            'write_monthly_ret': write_monthly_ret,
-            'nodata': nodata,
-            'block_size': block_size,
-        }
-        self.manifest.outputs = {
-            product: {
-                label: {'path': info['path'], 'stats': info['stats']}
-                for label, info in season_outputs.items()
-            }
-            for product, season_outputs in outputs.items()
-        }
-        self.manifest.statistics = {
-            'seasons_count': len(seasons),
-            'products_count': len(outputs),
-            'total_outputs': total_outputs,
-        }
-
         feedback.setProgress(100)
 
         return {

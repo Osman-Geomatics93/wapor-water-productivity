@@ -176,6 +176,8 @@ def parse_time_key_from_filename(filepath: Union[str, Path]) -> Optional[TimeKey
     - YYDD: e.g., 0901 = year 2009, dekad 01
     - YYYYDD: e.g., 201901 = year 2019, dekad 01
     - ISO date: YYYY-MM-DD embedded in filename
+    - WaPOR v3 format: YYYY-MM-DX where X is dekad in month (1, 2, or 3)
+      e.g., T_2025-01-D1.tif, AETI_2025-03-D2.tif
 
     Args:
         filepath: Path to raster file
@@ -184,6 +186,25 @@ def parse_time_key_from_filename(filepath: Union[str, Path]) -> Optional[TimeKey
         TimeKey object or None if parsing fails
     """
     filename = Path(filepath).stem
+
+    # Pattern 0: WaPOR v3 format YYYY-MM-DX - e.g., T_2025-01-D1, AETI_2025-03-D2
+    # This is the most common format from our download algorithm
+    match = re.search(r'(\d{4})-(\d{2})-D([123])', filename)
+    if match:
+        year = int(match.group(1))
+        month = int(match.group(2))
+        dekad_in_month = int(match.group(3))
+
+        if 1 <= month <= 12 and 1 <= dekad_in_month <= 3:
+            dekad = (month - 1) * 3 + dekad_in_month
+            start_date, end_date = dekad_to_dates(year, dekad)
+            return TimeKey(
+                year=year,
+                dekad=dekad,
+                start_date=start_date,
+                end_date=end_date,
+                raw_code=f'{year}-{month:02d}-D{dekad_in_month}'
+            )
 
     # Pattern 1: YYYYDD (6 digits) - e.g., L2_AETI_D_201901
     match = re.search(r'_(\d{4})(\d{2})(?:_|$|\.)', filename)
