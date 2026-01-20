@@ -148,6 +148,7 @@ DEFAULT_DTYPE = 'Float32'
 DEFAULT_COMPRESSION = 'LZW'
 DEFAULT_TILED = True
 DEFAULT_TILE_SIZE = 256
+DEFAULT_BLOCK_SIZE = 256  # Block size for raster processing
 DEFAULT_CRS_EPSG = 4326  # WGS84
 
 # GDAL creation options for output rasters
