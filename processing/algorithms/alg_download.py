@@ -387,6 +387,10 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
 
+        # Format dates for API (must be done before create_run)
+        start_date_str = start_date.toString('yyyy-MM-dd')
+        end_date_str = end_date.toString('yyyy-MM-dd')
+
         # Create analysis run record
         aoi_name = aoi_layer.name() if aoi_layer else 'extent'
         run_id = db.create_run(
@@ -408,10 +412,6 @@ class DownloadWaPORDataAlgorithm(WaPORBaseAlgorithm):
         total_failed = 0
         total_cached = 0
         all_outputs = {}
-
-        # Format dates for API
-        start_date_str = start_date.toString('yyyy-MM-dd')
-        end_date_str = end_date.toString('yyyy-MM-dd')
 
         # Process each product
         product_count = len(selected_products)
